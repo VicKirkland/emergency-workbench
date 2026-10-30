@@ -1,0 +1,3089 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>应急信息研判工作台</title>
+
+<style>
+:root {
+  --bg: #f3f6fa;
+  --panel: #ffffff;
+  --ink: #182536;
+  --muted: #64748b;
+  --line: #e2e8f0;
+  --nav: #12243a;
+  --nav2: #254b77;
+  --blue: #2864dc;
+  --blue-soft: #edf4ff;
+  --red: #c2413b;
+  --red-soft: #fff0ee;
+  --amber: #9a6700;
+  --amber-soft: #fff7df;
+  --green: #217a52;
+  --green-soft: #eaf8f0;
+  --shadow: 0 6px 22px rgba(21,38,61,.05);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 14px/1.6 -apple-system, BlinkMacSystemFont,
+        "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+button, input, textarea, select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+.app {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 235px minmax(0, 1fr);
+}
+
+/* 左侧导航 */
+
+.sidebar {
+  background: var(--nav);
+  color: #d8e3f1;
+  padding: 24px 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  min-height: 100vh;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 0 7px;
+}
+
+.brand-mark {
+  width: 42px;
+  height: 42px;
+  border-radius: 11px;
+  background: #2c5d97;
+  color: white;
+  display: grid;
+  place-items: center;
+  font-size: 19px;
+  font-weight: 800;
+}
+
+.brand strong {
+  display: block;
+  color: white;
+  font-size: 14px;
+}
+
+.brand small {
+  color: #9fb3cb;
+  font-size: 11px;
+}
+
+.nav-label {
+  color: #8298b3;
+  font-size: 10px;
+  letter-spacing: .12em;
+  padding: 0 12px;
+  margin-bottom: 7px;
+}
+
+.nav-list {
+  display: grid;
+  gap: 5px;
+}
+
+.nav-btn {
+  border: none;
+  background: transparent;
+  color: #c0cede;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  padding: 12px;
+  border-radius: 9px;
+  text-align: left;
+}
+
+.nav-btn:hover {
+  background: #1a314b;
+  color: white;
+}
+
+.nav-btn.active {
+  background: var(--nav2);
+  color: white;
+  box-shadow: inset 3px 0 #75a9ff;
+}
+
+.nav-icon {
+  width: 21px;
+  text-align: center;
+}
+
+.side-bottom {
+  margin-top: auto;
+  padding: 15px 8px 0;
+  border-top: 1px solid #2c4059;
+  color: #a8bad0;
+  font-size: 11px;
+}
+
+/* 顶部与公共布局 */
+
+main {
+  min-width: 0;
+}
+
+.topbar {
+  height: 76px;
+  border-bottom: 1px solid var(--line);
+  background: rgba(255,255,255,.92);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 30px;
+  gap: 15px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.crumb {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.topbar h1 {
+  margin: 2px 0 0;
+  font-size: 19px;
+}
+
+.top-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.demo-pill {
+  color: var(--amber);
+  background: var(--amber-soft);
+  border: 1px solid #f2df9b;
+  border-radius: 100px;
+  padding: 5px 9px;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.content {
+  max-width: 1500px;
+  margin: auto;
+  padding: 27px 30px 45px;
+}
+
+.page {
+  display: none;
+}
+
+.page.active {
+  display: block;
+}
+
+.page-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 15px;
+  margin-bottom: 22px;
+}
+
+.eyebrow {
+  color: var(--blue);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .13em;
+}
+
+.page-head h2 {
+  font-size: 25px;
+  margin: 4px 0 5px;
+  letter-spacing: -.03em;
+}
+
+.sub {
+  color: var(--muted);
+  margin: 0;
+  max-width: 750px;
+}
+
+.btn {
+  border: 1px solid var(--line);
+  background: white;
+  color: var(--ink);
+  padding: 9px 13px;
+  border-radius: 9px;
+  font-weight: 650;
+}
+
+.btn:hover {
+  background: #f8fafc;
+}
+
+.btn.primary {
+  background: var(--blue);
+  border-color: var(--blue);
+  color: white;
+}
+
+.btn.primary:hover {
+  background: #1e52bd;
+}
+
+.toolbar {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* 卡片 */
+
+.card, .metric {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  box-shadow: var(--shadow);
+  min-width: 0;
+}
+
+.card {
+  padding: 19px;
+  margin-bottom: 16px;
+}
+
+.card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.card-title {
+  font-size: 15px;
+  margin: 0;
+  font-weight: 800;
+}
+
+.card-desc {
+  color: var(--muted);
+  font-size: 12px;
+  margin: 4px 0 0;
+}
+
+.layout-two {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(270px, .75fr);
+  gap: 16px;
+}
+
+.layout-equal {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+/* 事件总览 */
+
+.banner {
+  background: linear-gradient(110deg, #183452, #245786);
+  color: white;
+  border-radius: 14px;
+  padding: 25px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(170px, .6fr);
+  gap: 20px;
+  box-shadow: var(--shadow);
+  margin-bottom: 17px;
+}
+
+.banner-tag {
+  color: #cbe0fa;
+  font-size: 11px;
+  letter-spacing: .08em;
+  font-weight: 700;
+}
+
+.banner h3 {
+  margin: 9px 0 7px;
+  font-size: 24px;
+}
+
+.banner p {
+  margin: 0;
+  color: #d5e2f2;
+  max-width: 650px;
+}
+
+.banner-side {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 15px;
+  border-left: 1px solid rgba(255,255,255,.2);
+  padding-left: 20px;
+}
+
+.risk-ring {
+  width: 78px;
+  height: 78px;
+  flex-shrink: 0;
+  border: 6px solid #f4bf66;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.risk-caption {
+  font-size: 11px;
+  color: #c6d8ea;
+}
+
+.risk-caption strong {
+  display: block;
+  font-size: 17px;
+  color: white;
+  margin-top: 3px;
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 13px;
+  margin-bottom: 17px;
+}
+
+.metric {
+  padding: 16px;
+}
+
+.metric-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.metric-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  background: var(--blue-soft);
+  color: var(--blue);
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+}
+
+.metric strong {
+  display: block;
+  font-size: 28px;
+  margin: 8px 0 1px;
+  letter-spacing: -.04em;
+}
+
+.metric small {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+/* 标签与状态 */
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 100px;
+  font-size: 10px;
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+.pill.red {
+  color: var(--red);
+  background: var(--red-soft);
+}
+
+.pill.amber {
+  color: var(--amber);
+  background: var(--amber-soft);
+}
+
+.pill.green {
+  color: var(--green);
+  background: var(--green-soft);
+}
+
+.pill.blue {
+  color: var(--blue);
+  background: var(--blue-soft);
+}
+
+.pill.gray {
+  color: #536175;
+  background: #edf1f5;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.notice {
+  background: var(--blue-soft);
+  color: #31527d;
+  border: 1px solid #d7e6ff;
+  border-radius: 9px;
+  padding: 12px;
+  font-size: 12px;
+  margin-top: 14px;
+}
+
+/* 列表 */
+
+.list {
+  display: grid;
+}
+
+.list-row {
+  display: flex;
+  gap: 11px;
+  align-items: flex-start;
+  padding: 12px 0;
+  border-top: 1px solid var(--line);
+}
+
+.list-row:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.list-row:last-child {
+  padding-bottom: 0;
+}
+
+.list-icon {
+  flex: 0 0 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+}
+
+.li-red {
+  color: var(--red);
+  background: var(--red-soft);
+}
+
+.li-amber {
+  color: var(--amber);
+  background: var(--amber-soft);
+}
+
+.li-green {
+  color: var(--green);
+  background: var(--green-soft);
+}
+
+.list-row strong {
+  display: block;
+  font-size: 13px;
+  margin-bottom: 3px;
+}
+
+.list-row p {
+  margin: 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* 事实卡片 */
+
+.fact-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.fact {
+  border: 1px solid var(--line);
+  padding: 13px;
+  border-radius: 10px;
+  min-width: 0;
+}
+
+.fact label {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  margin-bottom: 5px;
+}
+
+.fact strong {
+  display: block;
+  font-size: 13px;
+  line-height: 1.45;
+  margin-bottom: 7px;
+}
+
+.fact small {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+/* 评分表 */
+
+.table-tools {
+  display: flex;
+  gap: 9px;
+  flex-wrap: wrap;
+  margin-bottom: 13px;
+}
+
+.field {
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  padding: 9px 11px;
+  background: white;
+  color: var(--ink);
+  min-width: 0;
+}
+
+.field.search {
+  flex: 1;
+  min-width: 190px;
+}
+
+.table-wrap {
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 740px;
+  background: white;
+}
+
+th {
+  background: #f7f9fc;
+  color: #617087;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 12px;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+
+td {
+  padding: 12px;
+  border-bottom: 1px solid var(--line);
+  font-size: 12px;
+  vertical-align: top;
+}
+
+tbody tr {
+  cursor: pointer;
+}
+
+tbody tr:hover {
+  background: #f7faff;
+}
+
+tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.claim-id {
+  font-family: monospace;
+  font-size: 11px;
+  color: #5c6d82;
+}
+
+.claim-text {
+  font-weight: 650;
+  max-width: 380px;
+}
+
+.score-cell {
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.score-track {
+  width: 75px;
+  height: 5px;
+  background: #e9eef4;
+  border-radius: 10px;
+  margin-top: 5px;
+  overflow: hidden;
+}
+
+.score-track span {
+  display: block;
+  background: #477fce;
+  height: 100%;
+}
+
+.detail {
+  display: none;
+  background: #f8fbff;
+  border: 1px solid #d6e5f7;
+  border-radius: 10px;
+  padding: 16px;
+  margin-top: 13px;
+}
+
+.detail.open {
+  display: block;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.detail h4 {
+  margin: 0 0 6px;
+  font-size: 12px;
+}
+
+.detail p {
+  margin: 0;
+  color: #4c5e73;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+/* 冲突信息 */
+
+.conflict {
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  padding: 14px;
+  margin-bottom: 11px;
+}
+
+.conflict:last-child {
+  margin-bottom: 0;
+}
+
+.conflict-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.conflict-head strong {
+  font-size: 13px;
+}
+
+.versus {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.side-claim {
+  padding: 11px;
+  border-radius: 8px;
+  background: #f7f9fc;
+  font-size: 12px;
+}
+
+.side-claim b {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.side-claim p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.explain {
+  border-left: 3px solid #94b8eb;
+  padding: 8px 10px;
+  margin-top: 10px;
+  color: #4b5e75;
+  font-size: 12px;
+  background: #f7faff;
+}
+
+/* 优先核查与建议 */
+
+.priority-list {
+  display: grid;
+  gap: 12px;
+}
+
+.priority-item {
+  display: grid;
+  grid-template-columns: 27px 1fr;
+  gap: 10px;
+  align-items: start;
+}
+
+.priority-num {
+  width: 27px;
+  height: 27px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  background: var(--nav2);
+  color: white;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.priority-item strong {
+  font-size: 13px;
+}
+
+.priority-item p {
+  margin: 3px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.recommendation {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) auto;
+  gap: 11px;
+  padding: 13px 0;
+  border-top: 1px solid var(--line);
+  align-items: start;
+}
+
+.recommendation:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.recommendation .num {
+  width: 29px;
+  height: 29px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  background: var(--blue-soft);
+  color: var(--blue);
+  font-weight: 800;
+  font-size: 11px;
+}
+
+.recommendation strong {
+  font-size: 13px;
+}
+
+.recommendation p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+/* 报告与输入 */
+
+.report-section {
+  margin-bottom: 20px;
+}
+
+.report-section h3 {
+  font-size: 14px;
+  margin: 0 0 9px;
+}
+
+.report-section p {
+  margin: 0;
+  color: #4e6075;
+}
+
+.input-area {
+  width: 100%;
+  min-height: 240px;
+  resize: vertical;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  padding: 12px;
+  outline: none;
+  line-height: 1.7;
+}
+
+.input-area:focus, .field:focus {
+  border-color: #8cb4f7;
+  box-shadow: 0 0 0 3px rgba(40,100,220,.08);
+  outline: none;
+}
+
+.footer-note {
+  margin-top: 24px;
+  padding-top: 15px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 11px;
+  text-align: center;
+}
+
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  opacity: 0;
+  pointer-events: none;
+  background: #182536;
+  color: white;
+  padding: 11px 16px;
+  border-radius: 9px;
+  font-size: 12px;
+  z-index: 100;
+  transition: .2s;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+
+/* Dify 工作流接入后的实时结果展示 */
+.run-status {
+  display: none;
+  margin-top: 16px;
+  padding: 16px;
+  border: 1px solid #cfe0f5;
+  border-radius: 11px;
+  background: #f7fbff;
+}
+.run-status.visible { display: block; }
+.run-status-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 7px;
+}
+.run-status-head strong { font-size: 14px; }
+.run-status p { margin: 5px 0 0; color: #53657b; font-size: 12px; }
+.run-progress-list { margin: 10px 0 0; padding-left: 20px; color: #53657b; font-size: 12px; }
+.run-progress-list li { margin: 4px 0; overflow-wrap: anywhere; }
+.run-error { margin-top: 10px; color: #a52b27; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 12px; }
+.live-results { display: none; margin-bottom: 17px; }
+.live-results.visible { display: block; }
+.live-mode .page:not(#page-input) .demo-content { display: none !important; }
+.live-mode .demo-pill { color: #217a52; background: #eaf8f0; border-color: #c5ead5; }
+.live-card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  box-shadow: var(--shadow);
+  padding: 19px;
+  margin-bottom: 15px;
+  min-width: 0;
+}
+.live-card h3 { margin: 0 0 5px; font-size: 15px; }
+.live-card h4 { margin: 14px 0 7px; font-size: 13px; }
+.live-card > p, .live-muted { margin: 4px 0 0; color: var(--muted); font-size: 12px; }
+.live-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-bottom: 15px; }
+.live-stat { padding: 13px; background: #fff; border: 1px solid var(--line); border-radius: 11px; min-width: 0; }
+.live-stat span { display: block; font-size: 11px; color: var(--muted); }
+.live-stat strong { display: block; margin-top: 4px; font-size: 23px; overflow-wrap: anywhere; }
+.live-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.live-fields { display: grid; gap: 10px; }
+.live-field { border-top: 1px solid var(--line); padding-top: 9px; min-width: 0; }
+.live-field:first-child { border-top: 0; padding-top: 0; }
+.live-field-label { font-size: 11px; font-weight: 800; color: #617087; margin-bottom: 4px; }
+.live-field-value { font-size: 12px; line-height: 1.65; overflow-wrap: anywhere; white-space: pre-wrap; }
+.live-list { margin: 5px 0 0; padding-left: 20px; }
+.live-list li { margin: 5px 0; }
+.live-table-wrap { overflow: auto; border: 1px solid var(--line); border-radius: 10px; margin-top: 12px; }
+.live-table { min-width: 620px; width: 100%; border-collapse: collapse; background: #fff; }
+.live-table th { background: #f7f9fc; color: #617087; text-align: left; font-size: 11px; padding: 11px; border-bottom: 1px solid var(--line); }
+.live-table td { padding: 11px; border-bottom: 1px solid var(--line); font-size: 12px; vertical-align: top; overflow-wrap: anywhere; }
+.live-table tr:last-child td { border-bottom: 0; }
+.live-raw { margin-top: 12px; }
+.live-raw summary { cursor: pointer; color: #53657b; font-size: 12px; }
+.live-raw pre { white-space: pre-wrap; overflow-wrap: anywhere; background: #f7f9fc; border: 1px solid var(--line); border-radius: 8px; padding: 12px; font-size: 11px; max-height: 360px; overflow: auto; }
+.live-empty { padding: 12px; border-radius: 8px; background: #f7f9fc; color: var(--muted); font-size: 12px; }
+@media (max-width: 1050px) {
+  .live-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .live-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 680px) {
+  .live-stats { gap: 8px; }
+  .live-stat { padding: 10px; }
+  .live-stat strong { font-size: 20px; }
+}
+
+/* 手机与平板适配 */
+
+@media (max-width: 1050px) {
+  .metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .layout-two {
+    grid-template-columns: 1fr;
+  }
+
+  .fact-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .content {
+    padding: 22px 18px;
+  }
+}
+
+@media (max-width: 680px) {
+  .app {
+    display: block;
+  }
+
+  .sidebar {
+    position: relative;
+    height: auto;
+    min-height: 0;
+    padding: 15px 12px;
+    gap: 15px;
+  }
+
+  .side-bottom {
+    display: none;
+  }
+
+  .nav-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .nav-btn {
+    padding: 9px;
+    font-size: 12px;
+  }
+
+  .topbar {
+    height: auto;
+    min-height: 65px;
+    padding: 12px 16px;
+  }
+
+  .topbar h1 {
+    font-size: 16px;
+  }
+
+  .banner {
+    grid-template-columns: 1fr;
+    padding: 19px;
+  }
+
+  .banner-side {
+    border-left: 0;
+    border-top: 1px solid rgba(255,255,255,.2);
+    padding: 15px 0 0;
+    justify-content: flex-start;
+  }
+
+  .metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
+  }
+
+  .metric {
+    padding: 12px;
+  }
+
+  .metric strong {
+    font-size: 23px;
+  }
+
+  .layout-equal {
+    grid-template-columns: 1fr;
+  }
+
+  .fact-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .versus {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .page-head {
+    display: block;
+  }
+
+  .page-head .toolbar {
+    margin-top: 12px;
+  }
+
+  .top-actions .demo-pill {
+    display: none;
+  }
+
+  .content {
+    padding: 18px 12px 30px;
+  }
+}
+
+@media print {
+  .sidebar, .topbar, .toolbar, .table-tools, .footer-note {
+    display: none !important;
+  }
+
+  .app {
+    display: block;
+  }
+
+  .page {
+    display: none !important;
+  }
+
+  .page.active {
+    display: block !important;
+  }
+
+  body {
+    background: white;
+  }
+
+  .card, .metric {
+    box-shadow: none;
+    break-inside: avoid;
+  }
+
+  .content {
+    padding: 0;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+  <!-- 左侧导航 -->
+  <aside class="sidebar">
+
+    <div class="brand">
+      <div class="brand-mark">研</div>
+      <div>
+        <strong>应急信息研判</strong>
+        <small>EMERGENCY INTELLIGENCE</small>
+      </div>
+    </div>
+
+    <div>
+      <div class="nav-label">研判工作台</div>
+
+      <nav class="nav-list">
+        <button class="nav-btn active" data-page="overview">
+          <span class="nav-icon">▦</span>
+          态势总览
+        </button>
+
+        <button class="nav-btn" data-page="claims">
+          <span class="nav-icon">▤</span>
+          信息评分
+        </button>
+
+        <button class="nav-btn" data-page="facts">
+          <span class="nav-icon">⇄</span>
+          冲突与关键事实
+        </button>
+
+        <button class="nav-btn" data-page="report">
+          <span class="nav-icon">▧</span>
+          研判报告
+        </button>
+
+        <button class="nav-btn" data-page="input">
+          <span class="nav-icon">＋</span>
+          新增信息
+        </button>
+      </nav>
+    </div>
+
+    <div class="side-bottom">
+      <span style="color:#4cc38a">●</span>
+      演示系统运行中
+      <br>
+      <span style="display:block;margin-top:7px">
+        尚未运行工作流时，页面显示固定演示案例；运行成功后会切换为本次研判结果。
+      </span>
+    </div>
+
+  </aside>
+
+  <main>
+
+    <!-- 顶部导航 -->
+    <header class="topbar">
+      <div>
+        <div class="crumb">应急管理 / 信息研判工作台</div>
+        <h1 id="topTitle">事件态势总览</h1>
+      </div>
+
+      <div class="top-actions">
+        <span class="demo-pill">演示数据 · 等待运行</span>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <!-- ================= 总览 ================= -->
+      <section class="page active" id="page-overview">
+
+        <div class="page-head">
+          <div>
+            <div class="eyebrow">SITUATION OVERVIEW</div>
+            <h2>事件态势总览</h2>
+            <p class="sub">
+              汇总当前信息池中的主要事实、争议与待核查事项。
+              本页面使用虚构案例演示，不代表真实事件。
+            </p>
+          </div>
+
+          <div class="toolbar">
+            <button class="btn" onclick="window.print()">打印本页</button>
+            <button class="btn primary" onclick="showPage('input')">＋ 新增信息</button>
+          </div>
+        </div>
+
+        <div class="banner">
+          <div>
+            <div class="banner-tag">CURRENT INCIDENT / DEMO</div>
+
+            <h3>科创园 B 座火情</h3>
+
+            <p>
+              多源消息显示科创园 B 座出现浓烟及明火迹象，周边有消防车辆和警戒线。
+              起火原因、伤亡情况及具体管控范围仍有待核实。
+            </p>
+
+            <div style="margin-top:15px">
+              <span class="pill amber">原因待核实</span>
+              <span class="pill red">伤亡情况存在争议</span>
+              <span class="pill blue">演示案例</span>
+            </div>
+          </div>
+
+          <div class="banner-side">
+            <div class="risk-ring">高</div>
+            <div class="risk-caption">
+              综合风险等级
+              <strong>高风险</strong>
+              <span>潜在危害与不确定性综合判断</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="metrics">
+
+          <div class="metric">
+            <div class="metric-top">
+              已提取 Claims
+              <span class="metric-icon">C</span>
+            </div>
+            <strong>14</strong>
+            <small>当前演示案例</small>
+          </div>
+
+          <div class="metric">
+            <div class="metric-top">
+              信息来源
+              <span class="metric-icon">S</span>
+            </div>
+            <strong>4</strong>
+            <small>来源 A、B、C、D</small>
+          </div>
+
+          <div class="metric">
+            <div class="metric-top">
+              主要争议
+              <span class="metric-icon">!</span>
+            </div>
+            <strong>2</strong>
+            <small>起火原因、人员伤亡</small>
+          </div>
+
+          <div class="metric">
+            <div class="metric-top">
+              优先核查事项
+              <span class="metric-icon">✓</span>
+            </div>
+            <strong>4</strong>
+            <small>人员、火势、原因、范围</small>
+          </div>
+
+        </div>
+
+        <div class="layout-two">
+
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <h3 class="card-title">关键事实判断</h3>
+                <p class="card-desc">当前展示值是系统的暂定研判，不等于最终事实认证。</p>
+              </div>
+
+              <button class="btn sm" onclick="showPage('facts')">查看详情 →</button>
+            </div>
+
+            <div class="fact-grid">
+
+              <div class="fact">
+                <label>事件地点</label>
+                <strong>科创园 B 座</strong>
+                <span class="pill amber">部分支持</span>
+                <div><small>具体起火位置仍待核实</small></div>
+              </div>
+
+              <div class="fact">
+                <label>事件类型</label>
+                <strong>火情 / 火灾</strong>
+                <span class="pill green">多源支持</span>
+                <div><small>现场烟雾及明火描述</small></div>
+              </div>
+
+              <div class="fact">
+                <label>人员伤亡</label>
+                <strong>尚无法确认</strong>
+                <span class="pill red">存在争议</span>
+                <div><small>传闻与报告状态不一致</small></div>
+              </div>
+
+              <div class="fact">
+                <label>事故原因</label>
+                <strong>尚无法判断</strong>
+                <span class="pill red">存在争议</span>
+                <div><small>两种原因均缺乏有效核实</small></div>
+              </div>
+
+              <div class="fact">
+                <label>现场处置</label>
+                <strong>消防车辆已到场</strong>
+                <span class="pill blue">部分支持</span>
+                <div><small>缺少火势是否受控的信息</small></div>
+              </div>
+
+              <div class="fact">
+                <label>管控范围</label>
+                <strong>周边有警戒线</strong>
+                <span class="pill amber">部分支持</span>
+                <div><small>整个园区封锁尚未证实</small></div>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <h3 class="card-title">优先核查事项</h3>
+                <p class="card-desc">按潜在后果与信息缺口排序。</p>
+              </div>
+            </div>
+
+            <div class="priority-list">
+
+              <div class="priority-item">
+                <div class="priority-num">01</div>
+                <div>
+                  <strong>人员伤亡及是否有人被困</strong>
+                  <p>存在听到呼救及死亡传闻，需尽快核实。</p>
+                </div>
+              </div>
+
+              <div class="priority-item">
+                <div class="priority-num">02</div>
+                <div>
+                  <strong>火情是否已受控</strong>
+                  <p>现有消息不足以确认火势是否已控制或扑灭。</p>
+                </div>
+              </div>
+
+              <div class="priority-item">
+                <div class="priority-num">03</div>
+                <div>
+                  <strong>起火原因及燃烧物质</strong>
+                  <p>化学品与电池相关说法均未经确认。</p>
+                </div>
+              </div>
+
+              <div class="priority-item">
+                <div class="priority-num">04</div>
+                <div>
+                  <strong>实际管控范围</strong>
+                  <p>应区分周边警戒与整个园区封锁。</p>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <h3 class="card-title">系统使用说明</h3>
+              <p class="card-desc">当前版本展示一组固定的测试结果。</p>
+            </div>
+          </div>
+
+          <div class="list">
+
+            <div class="list-row">
+              <div class="list-icon li-green">1</div>
+              <div>
+                <strong>信息辨识</strong>
+                <p>把多源消息拆分为独立、可核验的事实主张。</p>
+              </div>
+            </div>
+
+            <div class="list-row">
+              <div class="list-icon li-green">2</div>
+              <div>
+                <strong>证据评估</strong>
+                <p>依据六项指标评估每条主张的证据支持情况。</p>
+              </div>
+            </div>
+
+            <div class="list-row">
+              <div class="list-icon li-green">3</div>
+              <div>
+                <strong>关系与研判</strong>
+                <p>识别相互支持、重复或存在争议的说法，形成暂定判断。</p>
+              </div>
+            </div>
+
+            <div class="list-row">
+              <div class="list-icon li-green">4</div>
+              <div>
+                <strong>决策辅助</strong>
+                <p>根据潜在危害与信息缺口提出核查优先级和备选行动。</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ================= 评分表 ================= -->
+      <section class="page" id="page-claims">
+
+        <div class="page-head">
+          <div>
+            <div class="eyebrow">CLAIM ASSESSMENT</div>
+            <h2>信息辨识与评分</h2>
+            <p class="sub">
+              点击任意一行查看原始消息、来源和评分解释。
+              这里的分数表示证据支持度，不是事实为真的概率。
+            </p>
+          </div>
+        </div>
+
+        <div class="card">
+
+          <div class="table-tools">
+            <input class="field search" id="claimSearch" placeholder="搜索 claim、内容、来源……">
+
+            <select class="field" id="scoreFilter">
+              <option value="all">全部分数</option>
+              <option value="high">60 分及以上</option>
+              <option value="mid">40–59 分</option>
+              <option value="low">40 分以下</option>
+            </select>
+
+            <select class="field" id="sourceFilter">
+              <option value="all">全部来源</option>
+              <option value="A">来源 A</option>
+              <option value="B">来源 B</option>
+              <option value="C">来源 C</option>
+              <option value="D">来源 D</option>
+            </select>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Claim ID</th>
+                  <th>事实主张</th>
+                  <th>来源</th>
+                  <th>证据支持度</th>
+                  <th>当前状态</th>
+                </tr>
+              </thead>
+              <tbody id="claimRows"></tbody>
+            </table>
+          </div>
+
+          <div class="detail" id="claimDetail">
+
+            <div class="card-head">
+              <div>
+                <h3 class="card-title" id="detailTitle">Claim 详情</h3>
+                <p class="card-desc" id="detailMeta"></p>
+              </div>
+
+              <button class="btn sm" onclick="closeDetail()">收起</button>
+            </div>
+
+            <div class="detail-grid">
+
+              <div>
+                <h4>原始消息摘录</h4>
+                <p id="detailEvidence"></p>
+              </div>
+
+              <div>
+                <h4>来源信息</h4>
+                <p id="detailSource"></p>
+              </div>
+
+              <div>
+                <h4>评分解释</h4>
+                <p id="detailReason"></p>
+              </div>
+
+              <div>
+                <h4>注意事项</h4>
+                <p id="detailCaveat"></p>
+              </div>
+
+            </div>
+
+          </div>
+
+          <div class="notice">
+            演示说明：表内分数来自当前测试结果的整理版本。
+            接入 Dify 后，网页将改为读取工作流返回的数据。
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- ================= 冲突与关键事实 ================= -->
+      <section class="page" id="page-facts">
+
+        <div class="page-head">
+          <div>
+            <div class="eyebrow">FACTS & CONFLICTS</div>
+            <h2>冲突信息与关键事实</h2>
+            <p class="sub">
+              先展示当前判断，再展示其他说法、证据依据和未解决问题。
+            </p>
+          </div>
+        </div>
+
+        <div class="card">
+
+          <div class="card-head">
+            <div>
+              <h3 class="card-title">关键事实字段</h3>
+              <p class="card-desc">以下为当前测试结果的整理展示。</p>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>事实维度</th>
+                  <th>当前展示值</th>
+                  <th>状态</th>
+                  <th>尚待核实</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                <tr>
+                  <td>事件地点</td>
+                  <td>科创园 B 座</td>
+                  <td><span class="pill amber">部分支持</span></td>
+                  <td>是否具体发生在一楼仓库</td>
+                </tr>
+
+                <tr>
+                  <td>事件时间</td>
+                  <td>今日 18 时左右（来源 D）</td>
+                  <td><span class="pill amber">待核实</span></td>
+                  <td>确切起火时间</td>
+                </tr>
+
+                <tr>
+                  <td>事件类型</td>
+                  <td>火情 / 火灾</td>
+                  <td><span class="pill green">多源支持</span></td>
+                  <td>实际燃烧范围及严重程度</td>
+                </tr>
+
+                <tr>
+                  <td>事故原因</td>
+                  <td>尚无法判断</td>
+                  <td><span class="pill red">存在争议</span></td>
+                  <td>化学品因素还是电池因素</td>
+                </tr>
+
+                <tr>
+                  <td>人员伤亡</td>
+                  <td>尚无法确认</td>
+                  <td><span class="pill red">存在争议</span></td>
+                  <td>是否有人受伤、被困或死亡</td>
+                </tr>
+
+                <tr>
+                  <td>现场处置</td>
+                  <td>消防车辆已到场</td>
+                  <td><span class="pill amber">部分支持</span></td>
+                  <td>火势是否已控制或扑灭</td>
+                </tr>
+
+                <tr>
+                  <td>管控范围</td>
+                  <td>科创园周边有警戒线</td>
+                  <td><span class="pill amber">部分支持</span></td>
+                  <td>是否扩大至整个园区</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+
+        <div class="card">
+
+          <div class="card-head">
+            <div>
+              <h3 class="card-title">主要争议一：事故原因</h3>
+              <p class="card-desc">两个原因说法均来自未获充分核实的信息。</p>
+            </div>
+            <span class="pill red">尚无法判断</span>
+          </div>
+
+          <div class="versus">
+
+            <div class="side-claim">
+              <b>来源 B · 匿名微信群</b>
+              <p>“科创园 B 座是化学品仓库爆炸引起的。”</p>
+              <div style="margin-top:9px">
+                <span class="pill red">转述</span>
+                <span class="pill gray">缺少原始证据</span>
+              </div>
+            </div>
+
+            <div class="side-claim">
+              <b>来源 D · 科技自媒体</b>
+              <p>“据知情网友透露，系电动车电池充电引发。”</p>
+              <div style="margin-top:9px">
+                <span class="pill red">转述</span>
+                <span class="pill gray">上游来源不明</span>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="explain">
+            当前两种说法都没有足够的可核验证据，不能因为其中一条消息写得更具体就选定其为事实。
+            应优先核实起火原因及是否涉及危险物质。
+          </div>
+
+        </div>
+
+        <div class="card">
+
+          <div class="card-head">
+            <div>
+              <h3 class="card-title">主要争议二：人员伤亡</h3>
+              <p class="card-desc">必须区分伤亡事实与“暂无伤亡报告”这一信息状态。</p>
+            </div>
+            <span class="pill red">尚无法确认</span>
+          </div>
+
+          <div class="versus">
+
+            <div class="side-claim">
+              <b>来源 B · 匿名微信群</b>
+              <p>“听说已经死了十几个人了。”</p>
+              <div style="margin-top:9px">
+                <span class="pill red">未经核实的传闻</span>
+              </div>
+            </div>
+
+            <div class="side-claim">
+              <b>来源 D · 科技自媒体</b>
+              <p>“目前暂无人员伤亡报告。”</p>
+              <div style="margin-top:9px">
+                <span class="pill amber">报告状态</span>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="explain">
+            暂无伤亡报告不等于已经确认无人伤亡。当前应核实是否有人受伤、被困或死亡，
+            不应将任何一方的说法直接当成最终结论。
+          </div>
+
+        </div>
+
+        <div class="card">
+
+          <div class="card-head">
+            <div>
+              <h3 class="card-title">其他需要核实的说法</h3>
+            </div>
+          </div>
+
+          <div class="list">
+
+            <div class="list-row">
+              <div class="list-icon li-amber">?</div>
+              <div>
+                <strong>疑似有人被困</strong>
+                <p>来源 A 称“好像听到里面有人喊救命”，尚无独立确认。</p>
+              </div>
+            </div>
+
+            <div class="list-row">
+              <div class="list-icon li-amber">?</div>
+              <div>
+                <strong>救护车到场情况</strong>
+                <p>目前仅来源 A 称救护车已经到达好几辆，缺少独立佐证。</p>
+              </div>
+            </div>
+
+            <div class="list-row">
+              <div class="list-icon li-amber">?</div>
+              <div>
+                <strong>整个园区是否封锁</strong>
+                <p>当前只确认周边存在警戒线，尚不能确认整个园区将被封锁。</p>
+              </div>
+            </div>
+
+            <div class="list-row">
+              <div class="list-icon li-amber">?</div>
+              <div>
+                <strong>空气中的刺激性气味</strong>
+                <p>来源 C 描述闻到刺鼻烧焦味，但无法据此确认具体燃烧物质或有毒物质存在。</p>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- ================= 研判报告 ================= -->
+      <section class="page" id="page-report">
+
+        <div class="page-head">
+          <div>
+            <div class="eyebrow">ASSESSMENT REPORT</div>
+            <h2>研判报告与决策建议</h2>
+            <p class="sub">
+              综合事件状态、主要风险、优先核查事项和备选行动。
+              所有建议仅用于演示，不代替专业人员与现场指挥机构判断。
+            </p>
+          </div>
+
+          <div class="toolbar">
+            <button class="btn" onclick="window.print()">打印 / 保存 PDF</button>
+          </div>
+        </div>
+
+        <div class="card">
+
+          <div class="report-section">
+            <h3>一、整体态势判断</h3>
+            <p>
+              多源消息共同指向科创园 B 座发生火情。来源 A 自述观察到黑烟和明火，
+              来源 C 描述周边有浓烟、消防车辆与警戒线，来源 D 也报道了火情。
+              现有材料对火情本身提供了一定支持，但对起火原因、伤亡情况、
+              火势是否受控及实际管控范围仍存在重要信息缺口。
+            </p>
+          </div>
+
+          <div class="report-section">
+            <h3>二、主要风险情景</h3>
+          </div>
+
+          <div class="recommendation">
+            <div class="num">01</div>
+            <div>
+              <strong>人员伤亡或被困风险</strong>
+              <p>
+                现有消息对人员情况的描述不一致，且有来源提到疑似听到呼救。
+                这些内容尚未得到确认，但应优先核查，以避免遗漏重大人员风险。
+              </p>
+            </div>
+            <span class="pill red">高优先级</span>
+          </div>
+
+          <div class="recommendation">
+            <div class="num">02</div>
+            <div>
+              <strong>火势进一步蔓延的风险</strong>
+              <p>
+                消息描述了浓烟和明火，但没有足够信息确认火势是否已经控制。
+                应获取最新现场处置情况，再判断是否需要进一步响应。
+              </p>
+            </div>
+            <span class="pill red">高优先级</span>
+          </div>
+
+          <div class="recommendation">
+            <div class="num">03</div>
+            <div>
+              <strong>危险物质相关风险</strong>
+              <p>
+                化学品与电池相关说法尚未证实。应把它们作为需要核查的条件性风险情景，
+                不应直接宣告现场存在危险化学品泄漏或二次爆炸。
+              </p>
+            </div>
+            <span class="pill red">高优先级</span>
+          </div>
+
+          <div class="recommendation">
+            <div class="num">04</div>
+            <div>
+              <strong>未经证实的信息引发混乱</strong>
+              <p>
+                关于死亡人数与园区封锁的说法尚未核实。需要查明实际情况，
+                并在适当时机发布准确、审慎的信息。
+              </p>
+            </div>
+            <span class="pill amber">中优先级</span>
+          </div>
+
+        </div>
+
+        <div class="card">
+
+          <div class="card-head">
+            <div>
+              <h3 class="card-title">三、优先核查与备选行动</h3>
+              <p class="card-desc">以下是决策辅助选项，并非自动执行的现场指令。</p>
+            </div>
+          </div>
+
+          <div class="recommendation">
+            <div class="num">01</div>
+            <div>
+              <strong>核实人员安全情况</strong>
+              <p>
+                通过可靠的现场信息确认是否有人被困、受伤或死亡，
+                并核对救护力量到场情况。
+              </p>
+            </div>
+            <span class="pill red">优先</span>
+          </div>
+
+          <div class="recommendation">
+            <div class="num">02</div>
+            <div>
+              <strong>核实火势和处置进展</strong>
+              <p>
+                获取最新的火势状态、救援进展和现场管控情况，
+                避免使用已经过时的消息判断当前状态。
+              </p>
+            </div>
+            <span class="pill red">优先</span>
+          </div>
+
+          <div class="recommendation">
+            <div class="num">03</div>
+            <div>
+              <strong>核实起火原因和燃烧物质</strong>
+              <p>
+                对化学品或电池相关说法进行核验，在获得专业信息前，
+                不应把任一种原因认定为已经成立。
+              </p>
+            </div>
+            <span class="pill red">优先</span>
+          </div>
+
+          <div class="recommendation">
+            <div class="num">04</div>
+            <div>
+              <strong>确认实际警戒范围</strong>
+              <p>
+                核实当前已实施的警戒与管控措施，区分现场已采取的措施
+                和消息中对未来行动的预测。
+              </p>
+            </div>
+            <span class="pill amber">后续</span>
+          </div>
+
+        </div>
+
+        <div class="card">
+
+          <div class="card-head">
+            <div>
+              <h3 class="card-title">四、研判局限</h3>
+              <p class="card-desc">模型结果需要结合进一步核查持续更新。</p>
+            </div>
+          </div>
+
+          <div class="list">
+
+            <div class="list-row">
+              <div class="list-icon li-amber">i</div>
+              <div>
+                <strong>来源限制</strong>
+                <p>输入主要来自社交媒体和自媒体，部分内容属于匿名转述，原始材料尚未全部提供。</p>
+              </div>
+            </div>
+
+            <div class="list-row">
+              <div class="list-icon li-amber">i</div>
+              <div>
+                <strong>时效性限制</strong>
+                <p>当前缺少连续时间序列，不能据此推断传播速度或实时火情变化。</p>
+              </div>
+            </div>
+
+            <div class="list-row">
+              <div class="list-icon li-amber">i</div>
+              <div>
+                <strong>模型使用限制</strong>
+                <p>风险情景及行动建议仅供辅助研判，不替代现场专业人员与应急指挥机构的判断。</p>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- ================= 新增信息 ================= -->
+      <section class="page" id="page-input">
+
+        <div class="page-head">
+          <div>
+            <div class="eyebrow">NEW INFORMATION</div>
+            <h2>新增信息</h2>
+            <p class="sub">
+              在这里输入多源消息，提交后将调用已连接的 Dify 工作流，并将结果更新到各研判页面。
+            </p>
+          </div>
+        </div>
+
+        <div class="layout-two">
+
+          <div class="card">
+
+            <div class="card-head">
+              <div>
+                <h3 class="card-title">提交待研判信息</h3>
+                <p class="card-desc">建议保留原始措辞、来源和可追溯线索。</p>
+              </div>
+
+              <span class="pill blue">工作流已接入</span>
+            </div>
+
+            <label for="incidentType" style="display:block;font-size:12px;font-weight:700;margin-bottom:6px">
+              事件类别（可选）
+            </label>
+
+            <input
+              id="incidentType"
+              class="field"
+              style="width:100%;margin-bottom:13px"
+              placeholder="例如：仓储火情"
+            >
+
+            <label for="incidentLocation" style="display:block;font-size:12px;font-weight:700;margin-bottom:6px">
+              事件地点（可选）
+            </label>
+
+            <input
+              id="incidentLocation"
+              class="field"
+              style="width:100%;margin-bottom:13px"
+              placeholder="例如：科创园 B 座"
+            >
+
+            <label for="incidentText" style="display:block;font-size:12px;font-weight:700;margin-bottom:6px">
+              多源信息原文
+            </label>
+
+            <textarea
+              id="incidentText"
+              class="input-area"
+              placeholder="来源A（平台/身份）：粘贴原始消息……
+来源B（平台/身份）：粘贴原始消息……"
+            ></textarea>
+
+            <label for="accessPassword" style="display:block;font-size:12px;font-weight:700;margin:13px 0 6px">
+              工作台访问密码
+            </label>
+
+            <input
+              id="accessPassword"
+              class="field"
+              type="password"
+              autocomplete="off"
+              style="width:100%"
+              placeholder="输入项目操作人员设置的访问密码"
+            >
+            <p class="muted" style="font-size:11px;margin:6px 0 0">密码不会写入 HTML 源码或自动保存。请勿在公开演示时展示输入框中的内容。</p>
+
+            <div class="toolbar" style="margin-top:13px">
+              <button id="submitBtn" class="btn primary" onclick="submitDemo()">提交并开始研判</button>
+              <button class="btn" onclick="clearInput()">清空</button>
+            </div>
+
+            <div id="inputPreview" class="detail">
+              <h4>输入预览</h4>
+              <p id="previewText"></p>
+            </div>
+
+            <div id="runStatus" class="run-status" role="status" aria-live="polite">
+              <div class="run-status-head">
+                <strong id="runStatusTitle">准备提交</strong>
+                <span id="runStatusBadge" class="pill gray">未开始</span>
+              </div>
+              <p id="runStatusMessage">提交后这里会显示实时执行进度。</p>
+              <details id="runProgressDetails" style="margin-top:10px">
+                <summary style="cursor:pointer;font-size:12px;color:#53657b">查看工作流执行记录</summary>
+                <ol id="runProgressList" class="run-progress-list"></ol>
+              </details>
+              <div id="runError" class="run-error"></div>
+              <div class="toolbar" style="margin-top:12px">
+                <button id="viewResultsBtn" class="btn primary" style="display:none" onclick="showPage('overview')">查看本次研判结果</button>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="card">
+
+            <div class="card-head">
+              <div>
+                <h3 class="card-title">提交前检查</h3>
+                <p class="card-desc">让后续研判更容易追踪消息来源。</p>
+              </div>
+            </div>
+
+            <div class="list">
+
+              <div class="list-row">
+                <div class="list-icon li-green">1</div>
+                <div>
+                  <strong>标注来源</strong>
+                  <p>尽量保留平台、发布时间、发布者类型和原始链接。</p>
+                </div>
+              </div>
+
+              <div class="list-row">
+                <div class="list-icon li-green">2</div>
+                <div>
+                  <strong>保留原始表述</strong>
+                  <p>不要提前将“疑似”改成事实，也不要删去不确定性表达。</p>
+                </div>
+              </div>
+
+              <div class="list-row">
+                <div class="list-icon li-green">3</div>
+                <div>
+                  <strong>区分不同消息</strong>
+                  <p>多源信息应分别标注，有助于判断消息是否独立或只是重复转述。</p>
+                </div>
+              </div>
+
+            </div>
+
+            <div class="notice">
+              访问密码只在本次提交时发送，不会保存在页面中。提交后请等待工作流完成；五项输出将分别显示在总览、信息评分、事实核查和研判报告页面。
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+      <div class="footer-note">
+        应急信息研判工作台 · 交互式静态原型 · 所有事件与评分仅为演示数据
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/*
+ * 以下数据是根据科创园测试案例整理的演示数据。
+ * 当前版本不调用 Dify，不代表真实事件的实际状况。
+ */
+
+const claims = [
+  {
+    id: "CLAIM-001",
+    text: "科创园B座发生大火。",
+    source: "A",
+    score: 37,
+    status: "部分支持",
+    evidence: "科创园B座起大火了！我就在对面楼上，看到一楼仓库那边冒出巨大的黑烟和明火！",
+    reason: "来源A自述正在直播并亲眼看到黑烟和明火；但火势严重程度和具体范围仍需要核验。",
+    sourceInfo: "短视频平台博主，正在直播；自述在对面楼上。",
+    caveat: "本次测试未实际提供可读取的直播视频，因此不能将视频内容视为已经独立核验。"
+  },
+  {
+    id: "CLAIM-002",
+    text: "科创园B座一楼仓库冒出巨大黑烟和明火。",
+    source: "A",
+    score: 49,
+    status: "部分支持",
+    evidence: "我就在对面楼上，看到一楼仓库那边冒出巨大的黑烟和明火！",
+    reason: "细节来自单一现场观察，能够支持烟雾和明火的描述，但缺少其他来源对一楼仓库位置和明火细节的独立核验。",
+    sourceInfo: "短视频平台博主；自述在对面楼上。",
+    caveat: "来源声称正在直播，但当前输入没有附上可独立检查的直播材料。"
+  },
+  {
+    id: "CLAIM-003",
+    text: "一楼仓库里面好像有人喊救命。",
+    source: "A",
+    score: 39,
+    status: "待核实",
+    evidence: "刚才好像还听到里面有人喊救命。",
+    reason: "来源使用“好像”表达不确定性，当前没有其他来源确认是否有人被困。",
+    sourceInfo: "短视频平台博主，正在直播。",
+    caveat: "疑似听到呼救不等于已经确认有人被困，但应优先核实。"
+  },
+  {
+    id: "CLAIM-004",
+    text: "已有好几辆救护车到达。",
+    source: "A",
+    score: 36,
+    status: "待核实",
+    evidence: "救护车已经到了好几辆。",
+    reason: "仅来源A提及，其他来源没有直接确认救护车数量或到场情况。",
+    sourceInfo: "短视频平台博主，正在直播。",
+    caveat: "当前缺少位置、数量和原始画面等可核验细节。"
+  },
+  {
+    id: "CLAIM-005",
+    text: "科创园B座火情是由化学品仓库爆炸引起的。",
+    source: "B",
+    score: 19,
+    status: "证据不足",
+    evidence: "内部消息，科创园B座是化学品仓库爆炸引起的。",
+    reason: "匿名微信群转述，没有可追溯上游来源或原始证据；与来源D提出的另一种原因说法不同。",
+    sourceInfo: "本地微信群网友，匿名；称其为“内部消息”。",
+    caveat: "原因未经证实，不应作为已知事实展示。"
+  },
+  {
+    id: "CLAIM-006",
+    text: "据说已死亡十几人。",
+    source: "B",
+    score: 18,
+    status: "证据不足",
+    evidence: "听说已经死了十几个人了。",
+    reason: "匿名转述，没有可靠的人员核查信息支持。",
+    sourceInfo: "本地微信群网友，匿名。",
+    caveat: "“暂无人员伤亡报告”与“没有人员伤亡”并非同义，实际情况仍需核实。"
+  },
+  {
+    id: "CLAIM-007",
+    text: "整个园区将要被封锁。",
+    source: "B",
+    score: 22,
+    status: "证据不足",
+    evidence: "整个园区都要封锁了。",
+    reason: "匿名来源的未来预测；周边有警戒线并不能证明整个园区将被封锁。",
+    sourceInfo: "本地微信群网友，匿名。",
+    caveat: "不要把预测当成已执行的管控措施。"
+  },
+  {
+    id: "CLAIM-008",
+    text: "科创园门口停了好几辆消防车。",
+    source: "C",
+    score: 53,
+    status: "部分支持",
+    evidence: "下班路过科创园，门口停了好几辆消防车。",
+    reason: "来源C描述亲历观察且称配有消防车图片。当前演示输入未附上实际图片，因此仍需进一步核验原始材料。",
+    sourceInfo: "路人朋友圈，配图消防车。",
+    caveat: "可以支持周边存在消防车辆，但不能单独证实事故原因或伤亡情况。"
+  },
+  {
+    id: "CLAIM-009",
+    text: "科创园周边拉起了警戒线。",
+    source: "C",
+    score: 47,
+    status: "部分支持",
+    evidence: "周边拉了警戒线。",
+    reason: "来源C称亲眼看到周边警戒线；没有其他来源明确说明警戒范围。",
+    sourceInfo: "路人朋友圈，配图消防车。",
+    caveat: "只支持周边有警戒线，不足以认定整个园区已封锁。"
+  },
+  {
+    id: "CLAIM-010",
+    text: "空气里有刺鼻的塑料烧焦味。",
+    source: "C",
+    score: 44,
+    status: "待核实",
+    evidence: "空气里全是刺鼻的塑料烧焦味。",
+    reason: "这是单一来源的感官观察，缺乏其他来源交叉验证，也不能据此确定具体燃烧物质。",
+    sourceInfo: "路人朋友圈，配图消防车。",
+    caveat: "不能据此确认有毒物质或特定化学品存在。"
+  },
+  {
+    id: "CLAIM-011",
+    text: "科创园现场有浓烟一直往外冒。",
+    source: "C",
+    score: 55,
+    status: "多源支持",
+    evidence: "我在外面没看到明火，只有浓烟一直往外冒。",
+    reason: "来源A和来源C都描述了烟雾现象，可相互支持现场有烟雾，但无法据此确定火势严重程度。",
+    sourceInfo: "路人朋友圈，配图消防车。",
+    caveat: "来源C在外围未看到明火，与来源A看到明火不一定矛盾，可能与观察位置或时间有关。"
+  },
+  {
+    id: "CLAIM-012",
+    text: "今日18时左右，科创园B座发生火情。",
+    source: "D",
+    score: 45,
+    status: "时间待核实",
+    evidence: "今日18时左右，我市科创园B座突发火情。",
+    reason: "地点与其他信息大致一致，但明确时间仅来自来源D，尚未得到独立确认。",
+    sourceInfo: "某科技自媒体号。",
+    caveat: "自媒体发布的时间信息仍需核验原始发布时间或现场记录。"
+  },
+  {
+    id: "CLAIM-013",
+    text: "火情系电动车电池充电引发。",
+    source: "D",
+    score: 20,
+    status: "证据不足",
+    evidence: "据知情网友透露，系电动车电池充电引发。",
+    reason: "来源D明确表示这是来自知情网友的说法，缺少原始证据，并与来源B的原因说法不同。",
+    sourceInfo: "某科技自媒体号，引用未具名网友。",
+    caveat: "不能因为消息写成“快讯”就认为原因已被核实。"
+  },
+  {
+    id: "CLAIM-014",
+    text: "目前暂无人员伤亡报告。",
+    source: "D",
+    score: 22,
+    status: "报告状态未核实",
+    evidence: "目前暂无人员伤亡报告。",
+    reason: "只能说明该消息没有提供伤亡报告，不能证明现场无人伤亡。",
+    sourceInfo: "某科技自媒体号。",
+    caveat: "需要与现场核查、医疗救援或可靠后续通报交叉核验。"
+  }
+];
+
+const titles = {
+  overview: "事件态势总览",
+  claims: "信息辨识与评分",
+  facts: "冲突信息与关键事实",
+  report: "研判报告与决策建议",
+  input: "新增信息"
+};
+
+/* 页面切换 */
+
+function showPage(name) {
+  document.querySelectorAll(".page").forEach(page => {
+    page.classList.remove("active");
+  });
+
+  const target = document.getElementById("page-" + name);
+  if (target) {
+    target.classList.add("active");
+  }
+
+  document.querySelectorAll(".nav-btn").forEach(button => {
+    button.classList.toggle("active", button.dataset.page === name);
+  });
+
+  document.getElementById("topTitle").textContent =
+    titles[name] || "应急信息研判";
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+document.querySelectorAll(".nav-btn").forEach(button => {
+  button.addEventListener("click", () => {
+    showPage(button.dataset.page);
+  });
+});
+
+/* HTML转义，防止输入内容被当成HTML执行 */
+
+function esc(value) {
+  return String(value).replace(/[&<>"']/g, char => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  })[char]);
+}
+
+/* 状态标签 */
+
+function statusClass(status) {
+  if (status.includes("多源")) {
+    return "green";
+  }
+
+  if (status.includes("支持")) {
+    return "amber";
+  }
+
+  if (
+    status.includes("待核实") ||
+    status.includes("不足") ||
+    status.includes("未核实")
+  ) {
+    return "red";
+  }
+
+  return "gray";
+}
+
+/* 渲染评分表 */
+
+function renderClaims() {
+  const search = (
+    document.getElementById("claimSearch")?.value || ""
+  ).trim().toLowerCase();
+
+  const scoreFilter =
+    document.getElementById("scoreFilter")?.value || "all";
+
+  const sourceFilter =
+    document.getElementById("sourceFilter")?.value || "all";
+
+  const filtered = claims.filter(claim => {
+    const searchable = [
+      claim.id,
+      claim.text,
+      claim.source,
+      claim.evidence,
+      claim.status
+    ].join(" ").toLowerCase();
+
+    const matchesSearch =
+      !search || searchable.includes(search);
+
+    const matchesScore =
+      scoreFilter === "all" ||
+      (scoreFilter === "high" && claim.score >= 60) ||
+      (scoreFilter === "mid" &&
+        claim.score >= 40 && claim.score < 60) ||
+      (scoreFilter === "low" && claim.score < 40);
+
+    const matchesSource =
+      sourceFilter === "all" ||
+      claim.source === sourceFilter;
+
+    return matchesSearch && matchesScore && matchesSource;
+  });
+
+  const tbody = document.getElementById("claimRows");
+
+  tbody.innerHTML = filtered.map(claim => `
+    <tr onclick="openClaim('${claim.id}')">
+      <td>
+        <span class="claim-id">${esc(claim.id)}</span>
+      </td>
+
+      <td>
+        <div class="claim-text">${esc(claim.text)}</div>
+      </td>
+
+      <td>
+        <span class="pill gray">来源 ${esc(claim.source)}</span>
+      </td>
+
+      <td>
+        <div class="score-cell">
+          ${claim.score}
+          <span class="muted" style="font-weight:500"> / 100</span>
+        </div>
+        <div class="score-track">
+          <span style="width:${claim.score}%"></span>
+        </div>
+      </td>
+
+      <td>
+        <span class="pill ${statusClass(claim.status)}">
+          ${esc(claim.status)}
+        </span>
+      </td>
+    </tr>
+  `).join("") || `
+    <tr>
+      <td colspan="5" class="muted">没有符合条件的结果。</td>
+    </tr>
+  `;
+}
+
+/* 打开单条Claim详情 */
+
+function openClaim(id) {
+  const claim = claims.find(item => item.id === id);
+  if (!claim) return;
+
+  const detail = document.getElementById("claimDetail");
+  detail.classList.add("open");
+
+  document.getElementById("detailTitle").textContent =
+    claim.id + " · " + claim.text;
+
+  document.getElementById("detailMeta").textContent =
+    "证据支持度 " + claim.score + "/100 · " + claim.status;
+
+  document.getElementById("detailEvidence").textContent =
+    claim.evidence;
+
+  document.getElementById("detailReason").textContent =
+    claim.reason;
+
+  document.getElementById("detailSource").textContent =
+    "来源 " + claim.source + "｜" + claim.sourceInfo;
+
+  document.getElementById("detailCaveat").textContent =
+    claim.caveat;
+
+  detail.scrollIntoView({
+    behavior: "smooth",
+    block: "nearest"
+  });
+}
+
+function closeDetail() {
+  document.getElementById("claimDetail").classList.remove("open");
+}
+
+document.getElementById("claimSearch")
+  .addEventListener("input", renderClaims);
+
+document.getElementById("scoreFilter")
+  .addEventListener("change", renderClaims);
+
+document.getElementById("sourceFilter")
+  .addEventListener("change", renderClaims);
+
+renderClaims();
+
+/* Dify Worker 流式接入与结果渲染 */
+
+const WORKER_ENDPOINT = "https://emergency-dify-proxy.vicek234287.workers.dev/run";
+let latestWorkflowOutputs = null;
+let latestWorkflowEvents = [];
+
+const outputLabels = {
+  current_situation_assessment: "当前态势判断",
+  overall_situation: "整体态势",
+  overall_assessment: "综合判断",
+  summary: "摘要",
+  supporting_facts: "已有支持的事实",
+  supported_facts: "已有支持的事实",
+  contested_facts: "存在争议的事实",
+  disputed_facts: "存在争议的事实",
+  unverified_claims: "尚未核实的说法",
+  unknowns: "仍不明确的信息",
+  urgent_checks: "优先核查事项",
+  priority_checks: "优先核查事项",
+  key_fact_assessments: "关键事实评估",
+  claim_relations: "主张之间的关系",
+  overall_risk_level: "综合风险等级",
+  risk_level: "风险等级",
+  risks: "主要风险",
+  risk_scenarios: "风险情景",
+  recommended_actions: "建议行动",
+  actions: "建议行动",
+  decision_options: "决策选项",
+  alternatives: "备选方案",
+  rationale: "判断依据",
+  limitations: "研判局限",
+  caveats: "注意事项",
+  evidence_support_score: "证据支持度",
+  claim_id: "主张编号",
+  claim_text: "事实主张",
+  field: "事实维度",
+  status: "当前状态",
+  assessment: "当前判断",
+  current_assessment: "当前判断",
+  evidence: "证据依据",
+  evidence_summary: "证据摘要",
+  evidence_gaps: "证据缺口",
+  gaps: "待核实信息",
+  confidence: "支持程度",
+  location: "地点",
+  time: "时间",
+  incident_type: "事件类型",
+  cause: "原因",
+  casualties: "人员伤亡",
+  control_scope: "管控范围",
+  propagation: "传播情况",
+  new_evidence: "新增证据",
+  relation_type: "关系类型",
+  source_claim_id: "来源主张编号",
+  target_claim_id: "关联主张编号",
+  explanation: "说明",
+  description: "说明",
+  priority: "优先级"
+};
+
+function labelForKey(key) {
+  if (Object.prototype.hasOwnProperty.call(outputLabels, key)) return outputLabels[key];
+  return String(key)
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, letter => letter.toUpperCase());
+}
+
+function parseMaybeJSON(value) {
+  if (typeof value !== "string") return value;
+  const trimmed = value.trim();
+  if (!trimmed) return value;
+  try { return JSON.parse(trimmed); } catch { return value; }
+}
+
+function unwrapSingleObject(value) {
+  let current = parseMaybeJSON(value);
+  // Dify structured text outputs commonly have one wrapper property.
+  for (let i = 0; i < 2; i++) {
+    if (current && typeof current === "object" && !Array.isArray(current)) {
+      const keys = Object.keys(current);
+      if (keys.length === 1 && current[keys[0]] && typeof current[keys[0]] === "object") {
+        current = current[keys[0]];
+      } else break;
+    } else break;
+  }
+  return current;
+}
+
+function htmlValue(value, depth = 0) {
+  value = parseMaybeJSON(value);
+  if (value === null || value === undefined || value === "") {
+    return '<span class="live-muted">未提供</span>';
+  }
+  if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
+    return esc(String(value));
+  }
+  if (Array.isArray(value)) {
+    if (!value.length) return '<span class="live-muted">暂无相关条目</span>';
+    if (depth >= 3) return esc(JSON.stringify(value));
+    return '<ul class="live-list">' + value.slice(0, 50).map(item => {
+      if (item && typeof item === "object") return '<li>' + htmlObject(item, depth + 1) + '</li>';
+      return '<li>' + htmlValue(item, depth + 1) + '</li>';
+    }).join("") + (value.length > 50 ? '<li>其余条目已省略显示</li>' : '') + '</ul>';
+  }
+  if (typeof value === "object") {
+    if (depth >= 3) return '<pre>' + esc(JSON.stringify(value, null, 2)) + '</pre>';
+    return htmlObject(value, depth + 1);
+  }
+  return esc(String(value));
+}
+
+function htmlObject(value, depth = 0) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return htmlValue(value, depth);
+  const entries = Object.entries(value);
+  if (!entries.length) return '<span class="live-muted">暂无数据</span>';
+  return '<div class="live-fields">' + entries.map(([key, val]) =>
+    '<div class="live-field"><div class="live-field-label">' + esc(labelForKey(key)) +
+    '</div><div class="live-field-value">' + htmlValue(val, depth) + '</div></div>'
+  ).join("") + '</div>';
+}
+
+function rawDisclosure(title, value) {
+  let raw;
+  try { raw = JSON.stringify(value, null, 2); } catch { raw = String(value); }
+  return '<details class="live-raw"><summary>' + esc(title) + '</summary><pre>' + esc(raw) + '</pre></details>';
+}
+
+function ensureLiveContainers() {
+  const pageNames = ["overview", "claims", "facts", "report"];
+  pageNames.forEach(name => {
+    const page = document.getElementById("page-" + name);
+    if (!page) return;
+    let container = document.getElementById("live-" + name);
+    if (!container) {
+      container = document.createElement("div");
+      container.className = "live-results";
+      container.id = "live-" + name;
+      const head = page.querySelector(":scope > .page-head");
+      if (head && head.nextSibling) page.insertBefore(container, head.nextSibling);
+      else page.appendChild(container);
+    }
+    Array.from(page.children).forEach(child => {
+      if (!child.classList.contains("page-head") && child !== container && !child.classList.contains("demo-content")) {
+        child.classList.add("demo-content");
+      }
+    });
+  });
+}
+
+function findArrayDeep(value, preferredKeys = []) {
+  value = parseMaybeJSON(value);
+  if (Array.isArray(value)) return value;
+  if (!value || typeof value !== "object") return null;
+  for (const key of preferredKeys) {
+    if (Array.isArray(value[key])) return value[key];
+  }
+  for (const val of Object.values(value)) {
+    const result = findArrayDeep(val, preferredKeys);
+    if (result) return result;
+  }
+  return null;
+}
+
+function findValueDeep(value, keyNames) {
+  value = parseMaybeJSON(value);
+  if (!value || typeof value !== "object") return undefined;
+  for (const key of keyNames) {
+    if (Object.prototype.hasOwnProperty.call(value, key)) return value[key];
+  }
+  for (const val of Object.values(value)) {
+    const found = findValueDeep(val, keyNames);
+    if (found !== undefined) return found;
+  }
+  return undefined;
+}
+
+function getLiveClaims(outputs) {
+  const parsed = parseMaybeJSON(outputs?.result_text);
+  let arr = Array.isArray(parsed) ? parsed : findArrayDeep(parsed, ["claims", "claim_assessments", "claim_scores", "scored_claims"]);
+  if (!Array.isArray(arr)) return [];
+  return arr.map((item, index) => {
+    item = item && typeof item === "object" ? item : { claim_text: String(item) };
+    const scoreRaw = item.evidence_support_score ?? item.total_score ?? item.score ?? item.overall_score ?? item.support_score;
+    const scoreNum = Number(scoreRaw);
+    const score = scoreRaw !== undefined && scoreRaw !== null && Number.isFinite(scoreNum) ? Math.max(0, Math.min(100, scoreNum)) : null;
+    return {
+      id: String(item.claim_id ?? item.id ?? `CLAIM-${String(index + 1).padStart(3, "0")}`),
+      text: String(item.claim_text ?? item.text ?? item.claim ?? item.content ?? item.statement ?? "（本条结果未提供主张文本）"),
+      source: String(item.source ?? item.source_name ?? item.source_id ?? item.source_type ?? "未标注"),
+      score,
+      status: String(item.status ?? item.assessment_status ?? (score === null ? "未提供评分" : "模型评分")),
+      evidence: String(item.evidence ?? item.source_excerpt ?? item.original_message ?? "未单独提供原始证据摘录。"),
+      reason: String(item.reason ?? item.explanation ?? item.rationale ?? item.assessment ?? "本次输出未单独提供评分解释。"),
+      raw: item
+    };
+  });
+}
+
+function getFactAssessments(outputs) {
+  const parsed = parseMaybeJSON(outputs?.key_facts_json);
+  const arr = findArrayDeep(parsed, ["key_fact_assessments", "facts", "assessments"]);
+  if (arr) return arr;
+  if (parsed && typeof parsed === "object") return Object.entries(parsed).map(([field, value]) => ({ field, assessment: value }));
+  return [];
+}
+
+function getRelations(outputs) {
+  const parsed = parseMaybeJSON(outputs?.relations_text);
+  const arr = findArrayDeep(parsed, ["claim_relations", "relations", "relationships"]);
+  return arr || [];
+}
+
+function showRawBlock(title, value) {
+  return '<div class="live-card"><h3>' + esc(title) + '</h3>' + htmlValue(value) + rawDisclosure("查看原始输出 JSON", value) + '</div>';
+}
+
+function renderClaimsLive(outputs) {
+  const target = document.getElementById("live-claims");
+  const items = getLiveClaims(outputs);
+  const stats = '<div class="live-stats">' +
+    '<div class="live-stat"><span>本次提取主张</span><strong>' + items.length + '</strong></div>' +
+    '<div class="live-stat"><span>有评分的主张</span><strong>' + items.filter(x => x.score !== null).length + '</strong></div>' +
+    '<div class="live-stat"><span>最高支持度分数</span><strong>' + (items.some(x => x.score !== null) ? Math.max(...items.filter(x => x.score !== null).map(x => x.score)) : "—") + '</strong></div>' +
+    '<div class="live-stat"><span>数据来源</span><strong>Dify</strong></div></div>';
+  if (!items.length) {
+    target.innerHTML = stats + '<div class="live-card"><h3>本次信息评分</h3><div class="live-empty">工作流已经返回，但 result_text 中没有识别到主张列表。可展开原始输出检查字段结构。</div>' + rawDisclosure("查看 result_text", outputs?.result_text) + '</div>';
+    target.classList.add("visible");
+    return;
+  }
+  const rows = items.map((item, index) => {
+    const score = item.score === null ? "未提供" : `${item.score} / 100`;
+    const scoreBar = item.score === null ? "" : '<div class="score-track"><span style="width:' + item.score + '%"></span></div>';
+    return '<tr><td><span class="claim-id">' + esc(item.id) + '</span></td>' +
+      '<td><strong>' + esc(item.text) + '</strong><details class="live-raw"><summary>查看本条详细信息</summary>' +
+      '<div class="live-fields"><div class="live-field"><div class="live-field-label">原始证据</div><div class="live-field-value">' + esc(item.evidence) + '</div></div>' +
+      '<div class="live-field"><div class="live-field-label">评分说明</div><div class="live-field-value">' + esc(item.reason) + '</div></div></div>' + rawDisclosure("完整本条数据", item.raw) + '</details></td>' +
+      '<td>' + esc(item.source) + '</td><td><strong>' + esc(score) + '</strong>' + scoreBar + '</td>' +
+      '<td><span class="pill ' + (item.score === null ? 'gray' : item.score >= 60 ? 'green' : item.score >= 35 ? 'amber' : 'red') + '">' + esc(item.status) + '</span></td></tr>';
+  }).join("");
+  target.innerHTML = stats + '<div class="live-card"><h3>本次信息评分</h3><p>以下内容来自刚刚完成的 Dify 工作流。证据支持度是模型按指标形成的评分，不代表事实为真的概率。</p>' +
+    '<div class="live-table-wrap"><table class="live-table"><thead><tr><th>Claim ID</th><th>事实主张与详情</th><th>来源</th><th>证据支持度</th><th>状态</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+    rawDisclosure("查看 result_text 原始输出", parseMaybeJSON(outputs?.result_text)) + '</div>';
+  target.classList.add("visible");
+}
+
+function renderFactsLive(outputs) {
+  const target = document.getElementById("live-facts");
+  const facts = getFactAssessments(outputs);
+  const relations = getRelations(outputs);
+  let factHtml;
+  if (facts.length) {
+    factHtml = '<div class="live-grid">' + facts.map((fact, i) => {
+      const title = fact?.field ?? fact?.fact ?? fact?.name ?? fact?.dimension ?? `关键事实 ${i + 1}`;
+      return '<div class="live-card"><h3>' + esc(String(title)) + '</h3>' + htmlObject(fact && typeof fact === "object" ? Object.fromEntries(Object.entries(fact).filter(([k]) => !["field", "fact", "name", "dimension"].includes(k))) : { assessment: fact }) + '</div>';
+    }).join("") + '</div>';
+  } else {
+    factHtml = showRawBlock("关键事实评估", parseMaybeJSON(outputs?.key_facts_json));
+  }
+  const relationHtml = relations.length
+    ? '<div class="live-grid">' + relations.map((relation, i) => '<div class="live-card"><h3>关系 ' + (i + 1) + '</h3>' + htmlObject(relation) + '</div>').join("") + '</div>'
+    : '<div class="live-empty">本次工作流没有输出可展示的主张关系。可能是没有识别到符合设定条件的关系，并不等同于现实中不存在关联或冲突。</div>';
+  target.innerHTML = '<div class="live-stats">' +
+    '<div class="live-stat"><span>关键事实字段</span><strong>' + facts.length + '</strong></div>' +
+    '<div class="live-stat"><span>主张关系</span><strong>' + relations.length + '</strong></div>' +
+    '<div class="live-stat"><span>输出来源</span><strong>Dify</strong></div>' +
+    '<div class="live-stat"><span>判断方式</span><strong>辅助研判</strong></div></div>' +
+    '<div class="live-card"><h3>关键事实评估</h3><p>这些字段展示模型对各项关键事实的判断、依据与信息缺口；未知不等于否定。</p>' + factHtml + rawDisclosure("查看 key_facts_json 原始输出", parseMaybeJSON(outputs?.key_facts_json)) + '</div>' +
+    '<div class="live-card"><h3>主张之间的关系</h3><p>包括支持、矛盾、重复、补充、更新或其他关联（以工作流实际输出为准）。</p>' + relationHtml + rawDisclosure("查看 relations_text 原始输出", parseMaybeJSON(outputs?.relations_text)) + '</div>';
+  target.classList.add("visible");
+}
+
+function renderOverviewLive(outputs) {
+  const target = document.getElementById("live-overview");
+  const claims = getLiveClaims(outputs);
+  const facts = getFactAssessments(outputs);
+  const relations = getRelations(outputs);
+  const situation = unwrapSingleObject(parseMaybeJSON(outputs?.situation_text));
+  const decision = unwrapSingleObject(parseMaybeJSON(outputs?.risk_decision_text));
+  const riskLevel = findValueDeep(decision, ["overall_risk_level", "risk_level", "overall_risk", "risk_rating"]);
+  const scored = claims.filter(x => x.score !== null);
+  const avg = scored.length ? Math.round(scored.reduce((sum, x) => sum + x.score, 0) / scored.length) : null;
+  target.innerHTML = '<div class="live-stats">' +
+    '<div class="live-stat"><span>本次提取主张</span><strong>' + claims.length + '</strong></div>' +
+    '<div class="live-stat"><span>关键事实评估</span><strong>' + facts.length + '</strong></div>' +
+    '<div class="live-stat"><span>识别的主张关系</span><strong>' + relations.length + '</strong></div>' +
+    '<div class="live-stat"><span>平均证据支持度</span><strong>' + (avg === null ? '—' : avg) + '</strong></div></div>' +
+    '<div class="live-grid"><div class="live-card"><h3>当前态势判断</h3><p>来自本次工作流的态势评估结果。</p>' + htmlValue(situation) + rawDisclosure("查看 situation_text 原始输出", situation) + '</div>' +
+    '<div class="live-card"><h3>风险与决策支持</h3>' + (riskLevel !== undefined ? '<p><strong>综合风险等级：</strong>' + htmlValue(riskLevel) + '</p>' : '') + htmlValue(decision) + rawDisclosure("查看 risk_decision_text 原始输出", decision) + '</div></div>' +
+    '<div class="live-card"><h3>本次运行说明</h3><p>页面数据来自最近一次成功完成的 Dify 工作流运行。结果属于辅助研判，仍需结合现场信息核实，不会自动执行任何决策。</p></div>';
+  target.classList.add("visible");
+}
+
+function renderReportLive(outputs) {
+  const target = document.getElementById("live-report");
+  const situation = unwrapSingleObject(parseMaybeJSON(outputs?.situation_text));
+  const decision = unwrapSingleObject(parseMaybeJSON(outputs?.risk_decision_text));
+  target.innerHTML = '<div class="live-card"><h3>一、当前态势判断</h3>' + htmlValue(situation) + rawDisclosure("查看 situation_text 原始输出", situation) + '</div>' +
+    '<div class="live-card"><h3>二、风险与决策支持</h3>' + htmlValue(decision) + rawDisclosure("查看 risk_decision_text 原始输出", decision) + '</div>' +
+    '<div class="live-card"><h3>三、信息评分与事实核查结果</h3><p>详细主张评分见“信息评分”页面；关键事实及主张关系见“冲突与关键事实”页面。</p>' +
+    '<div class="toolbar" style="margin-top:12px"><button class="btn" onclick="showPage(\'claims\')">查看信息评分</button><button class="btn" onclick="showPage(\'facts\')">查看事实与关系</button></div></div>';
+  target.classList.add("visible");
+}
+
+function renderEmptyStates() {
+  document.body.classList.add("live-mode");
+
+  const messages = {
+    overview: "尚未运行研判。请进入“新增信息”提交材料，成功后这里将展示本次态势与风险结果。",
+    claims: "尚未生成信息评分。提交多源信息并完成研判后，这里将展示实际主张及其评分。",
+    facts: "尚未生成事实核查结果。完成研判后，这里将展示关键事实与主张关系。",
+    report: "尚未生成研判报告。完成研判后，这里将展示态势评估、风险和决策辅助建议。"
+  };
+
+  Object.entries(messages).forEach(([name, message]) => {
+    const target = document.getElementById("live-" + name);
+
+    if (target) {
+      target.innerHTML =
+        '<div class="live-card">' +
+        '<h3>尚无本次研判结果</h3>' +
+        '<p>' + esc(message) + '</p>' +
+        '</div>';
+
+      target.classList.add("visible");
+    }
+  });
+
+  const badge = document.querySelector(".demo-pill");
+  if (badge) badge.textContent = "等待提交新信息";
+
+  const sideBottom = document.querySelector(".side-bottom");
+  if (sideBottom) {
+    sideBottom.innerHTML =
+      '<span style="color:#8298b3">●</span> 等待研判<br>' +
+      '<span style="display:block;margin-top:7px">' +
+      '提交信息后显示本次实际运行结果。' +
+      '</span>';
+  }
+
+  const footer = document.querySelector(".footer-note");
+  if (footer) {
+    footer.textContent =
+      "应急信息研判工作台 · AI 辅助研判 · 等待提交信息";
+  }
+
+  const descriptions = {
+    overview: "提交待研判信息后，这里将显示本次事件的态势与风险分析。",
+    claims: "完成研判后，查看本次工作流提取的事实主张与评分。",
+    facts: "完成研判后，查看本次工作流输出的关键事实与主张关系。",
+    report: "完成研判后，查看本次态势评估与风险决策建议。"
+  };
+
+  Object.entries(descriptions).forEach(([name, text]) => {
+    const element = document.querySelector(
+      "#page-" + name + " .page-head .sub"
+    );
+
+    if (element) element.textContent = text;
+  });
+}
+function renderWorkflowOutputs(outputs) {
+  latestWorkflowOutputs = outputs || {};
+
+  renderOverviewLive(latestWorkflowOutputs);
+  renderClaimsLive(latestWorkflowOutputs);
+  renderFactsLive(latestWorkflowOutputs);
+  renderReportLive(latestWorkflowOutputs);
+
+  document.body.classList.add("live-mode");
+
+  const badge = document.querySelector(".demo-pill");
+  if (badge) badge.textContent = "最近一次运行 · Dify 输出";
+
+  const sideBottom = document.querySelector(".side-bottom");
+  if (sideBottom) {
+    sideBottom.innerHTML =
+      '<span style="color:#4cc38a">●</span> 工作流已连接<br>' +
+      '<span style="display:block;margin-top:7px">' +
+      '当前显示最近一次成功运行的结果。' +
+      '</span>';
+  }
+
+  const footer = document.querySelector(".footer-note");
+  if (footer) {
+    footer.textContent =
+      "应急信息研判工作台 · AI 辅助研判 · 结果需结合可靠信息进一步核实";
+  }
+
+  const topDescriptions = document.querySelectorAll(
+    "#page-overview .page-head .sub, " +
+    "#page-claims .page-head .sub, " +
+    "#page-facts .page-head .sub, " +
+    "#page-report .page-head .sub"
+  );
+
+  const texts = [
+    "展示最近一次运行的态势、证据支持度与风险决策结果。",
+    "查看本次工作流提取的事实主张及证据支持度评分。",
+    "查看本次工作流输出的关键事实与主张关系。",
+    "查看本次态势评估、风险情景与决策辅助建议。"
+  ];
+
+  topDescriptions.forEach((element, index) => {
+    element.textContent = texts[index] || element.textContent;
+  });
+
+  // 保存到当前浏览器标签页，刷新后恢复
+  try {
+    sessionStorage.setItem(
+      "emergencyLatestWorkflowOutputs_v2",
+      JSON.stringify(latestWorkflowOutputs)
+    );
+  } catch (error) {
+    console.warn("暂时无法保存本次结果", error);
+  }
+}
+function setRunStatus(title, message, badgeText = "运行中", badgeClass = "blue") {
+  const status = document.getElementById("runStatus");
+  status.classList.add("visible");
+  document.getElementById("runStatusTitle").textContent = title;
+  document.getElementById("runStatusMessage").textContent = message;
+  const badge = document.getElementById("runStatusBadge");
+  badge.textContent = badgeText;
+  badge.className = "pill " + badgeClass;
+}
+
+function addRunProgress(message) {
+  latestWorkflowEvents.push(message);
+  if (latestWorkflowEvents.length > 40) latestWorkflowEvents.shift();
+  const list = document.getElementById("runProgressList");
+  list.innerHTML = latestWorkflowEvents.map(item => '<li>' + esc(item) + '</li>').join("");
+  list.scrollTop = list.scrollHeight;
+}
+
+function processWorkflowEvent(item) {
+  if (!item || typeof item !== "object") return;
+  const event = item.event || "message";
+  const data = item.data || {};
+  if (event === "ping") return;
+  if (event === "workflow_started") {
+    setRunStatus("工作流已启动", "正在逐步分析输入信息，请保持页面打开。", "运行中", "blue");
+    addRunProgress("工作流开始执行");
+  } else if (event === "node_started") {
+    const name = data.title || data.node_name || data.node_id || "未知节点";
+    setRunStatus("正在研判", "当前执行节点：" + name, "运行中", "blue");
+    addRunProgress("开始执行节点：" + name);
+  } else if (event === "node_finished") {
+    const name = data.title || data.node_name || data.node_id || "未知节点";
+    addRunProgress("节点结束：" + name + "（" + (data.status || "已返回") + "）");
+  } else if (event === "iteration_started") {
+    addRunProgress("开始逐条评估信息");
+  } else if (event === "iteration_next") {
+    addRunProgress("继续处理下一条信息");
+  } else if (event === "iteration_completed") {
+    addRunProgress("逐条评估完成");
+  } else if (event === "workflow_finished") {
+    const status = data.status || item.status || "unknown";
+    const outputs = data.outputs || item.outputs || {};
+    if (status === "succeeded" || status === "success") {
+      latestWorkflowOutputs = outputs;
+      setRunStatus("研判完成", "工作流成功结束，结果已更新到各页面。", "成功", "green");
+      addRunProgress("工作流执行成功");
+      document.getElementById("viewResultsBtn").style.display = "inline-block";
+    } else {
+      setRunStatus("工作流未成功完成", "Dify 返回状态：" + status, "失败", "red");
+      addRunProgress("工作流结束，状态为：" + status);
+      document.getElementById("runError").textContent = JSON.stringify(data, null, 2);
+    }
+  } else if (event === "error") {
+    setRunStatus("工作流返回错误", "Dify 在执行过程中报告了错误。", "失败", "red");
+    document.getElementById("runError").textContent = JSON.stringify(item, null, 2);
+    addRunProgress("收到工作流错误事件");
+  }
+}
+
+async function submitDemo() {
+  const text = document.getElementById("incidentText").value.trim();
+  const category = document.getElementById("incidentType").value.trim();
+  const location = document.getElementById("incidentLocation").value.trim();
+  const password = document.getElementById("accessPassword").value;
+
+  if (!text) {
+    showToast("请先粘贴一条或多条待研判消息。");
+    return;
+  }
+  if (!password) {
+    showToast("请先输入工作台访问密码。");
+    document.getElementById("accessPassword").focus();
+    return;
+  }
+  if (text.length > 20000) {
+    showToast("输入过长，请控制在20000个字符以内。");
+    return;
+  }
+
+  const button = document.getElementById("submitBtn");
+  button.disabled = true;
+  button.textContent = "正在研判…";
+  latestWorkflowEvents = [];
+  document.getElementById("runProgressList").innerHTML = "";
+  document.getElementById("runError").textContent = "";
+  document.getElementById("viewResultsBtn").style.display = "none";
+  document.getElementById("runProgressDetails").open = true;
+  setRunStatus("正在连接工作流", "请求正在发送到安全后端。不要重复点击提交。", "连接中", "blue");
+showToast("正在发送请求，等待后端确认。");
+  // The current Worker passes incident_information, incident_location and incident_time to Dify.
+  // Prefixing the optional category to the original text preserves it without changing Worker code.
+  const incidentInformation = category ? "事件类别（用户填写，尚未独立核实）：" + category + "\n\n" + text : text;
+
+  try {
+    const response = await fetch(WORKER_ENDPOINT, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Access-Password": password
+      },
+      body: JSON.stringify({
+        incident_information: incidentInformation,
+        incident_location: location,
+        incident_time: ""
+      })
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      let errorMessage = errorText;
+      try {
+        const parsedError = JSON.parse(errorText);
+        errorMessage = parsedError.error || parsedError.message || JSON.stringify(parsedError, null, 2);
+        if (parsedError.details) errorMessage += "\n" + JSON.stringify(parsedError.details, null, 2);
+      } catch {}
+      setRunStatus("请求失败", "后端返回 HTTP " + response.status + "。", "失败", "red");
+      document.getElementById("runError").textContent = errorMessage;
+      addRunProgress("HTTP 请求失败：" + response.status);
+      return;
+    }
+
+    const contentType = response.headers.get("content-type") || "";
+    if (!contentType.includes("text/event-stream")) {
+      const textBody = await response.text();
+      let result;
+      try { result = JSON.parse(textBody); } catch { result = { message: textBody }; }
+      if (result.fallback_response) {
+        const fallback = result.fallback_response;
+        const fallbackOutputs = fallback?.data?.outputs || fallback?.outputs;
+        if (fallbackOutputs) {
+          renderWorkflowOutputs(fallbackOutputs);
+          setRunStatus("研判完成", "后端返回了非流式结果，已更新页面。", "成功", "green");
+          document.getElementById("viewResultsBtn").style.display = "inline-block";
+          return;
+        }
+      }
+      setRunStatus("收到非预期响应", "后端没有返回事件流。", "需检查", "amber");
+      document.getElementById("runError").textContent = JSON.stringify(result, null, 2);
+      return;
+    }
+
+    if (!response.body) throw new Error("浏览器没有提供可读取的响应流。");
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+    let gotFinished = false;
+    let finishedStatus = "";
+
+    function handleSSEBlock(block) {
+      if (!block.trim() || block.trim() === ": ping") return;
+      const dataLines = block.split(/\r?\n/).filter(line => line.startsWith("data:")).map(line => line.slice(5).trimStart());
+      if (!dataLines.length) {
+        if (block.includes("event: ping")) return;
+        return;
+      }
+      const dataText = dataLines.join("\n");
+      let item;
+      try { item = JSON.parse(dataText); }
+      catch {
+        addRunProgress("收到一条无法解析的流式事件");
+        return;
+      }
+      processWorkflowEvent(item);
+      if (item.event === "workflow_finished") {
+        gotFinished = true;
+        finishedStatus = item.data?.status || item.status || "unknown";
+        if ((finishedStatus === "succeeded" || finishedStatus === "success") && (item.data?.outputs || item.outputs)) {
+          latestWorkflowOutputs = item.data?.outputs || item.outputs;
+        }
+      }
+    }
+
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const blocks = buffer.split(/\r?\n\r?\n/);
+      buffer = blocks.pop() || "";
+      blocks.forEach(handleSSEBlock);
+    }
+    buffer += decoder.decode();
+    if (buffer.trim()) handleSSEBlock(buffer);
+
+    if (!gotFinished) {
+      setRunStatus("连接结束，但未收到完成事件", "浏览器未收到 workflow_finished。请查看执行记录和 Cloudflare 日志，再决定是否重试。", "未确认", "amber");
+      addRunProgress("响应流结束但缺少 workflow_finished 事件");
+      return;
+    }
+    if (finishedStatus === "succeeded" || finishedStatus === "success") {
+      renderWorkflowOutputs(latestWorkflowOutputs || {});
+      setRunStatus("研判完成", "工作流成功结束，五项输出已解析并展示。", "成功", "green");
+      showToast("研判完成，结果已更新。");
+    } else {
+      setRunStatus("工作流执行失败", "Dify 返回状态：" + finishedStatus, "失败", "red");
+    }
+  } catch (error) {
+    setRunStatus("连接中断或请求异常", "无法正常读取工作流响应。先查看下方错误信息，不要连续重试。", "连接异常", "red");
+    document.getElementById("runError").textContent = error?.message || String(error);
+    addRunProgress("请求异常：" + (error?.message || String(error)));
+  } finally {
+    button.disabled = false;
+    button.textContent = "再次提交并研判";
+  }
+}
+
+function clearInput() {
+  document.getElementById("incidentType").value = "";
+  document.getElementById("incidentLocation").value = "";
+  document.getElementById("incidentText").value = "";
+  document.getElementById("accessPassword").value = "";
+  document.getElementById("inputPreview").classList.remove("open");
+  showToast("输入已清空。访问密码也已清除。");
+}
+
+ensureLiveContainers();
+
+try {
+  const savedOutputs = sessionStorage.getItem(
+    "emergencyLatestWorkflowOutputs_v2"
+  );
+
+  if (savedOutputs) {
+    renderWorkflowOutputs(JSON.parse(savedOutputs));
+  } else {
+    renderEmptyStates();
+  }
+} catch (error) {
+  console.warn("恢复上次结果失败", error);
+  renderEmptyStates();
+}
+/* 输入预览 */
+
+let toastTimer;
+
+function showToast(message) {
+  const toast = document.getElementById("toast");
+  toast.textContent = message;
+  toast.classList.add("show");
+
+  clearTimeout(toastTimer);
+
+  toastTimer = setTimeout(() => {
+    toast.classList.remove("show");
+  }, 3000);
+}
+
+
+</script>
+
+</body>
+</html>
